@@ -1,9 +1,9 @@
-# gscript
+# gleam_script
 
-[![Package Version](https://img.shields.io/hexpm/v/gscript)](https://hex.pm/packages/gscript)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gscript/)
+[![Package Version](https://img.shields.io/hexpm/v/gleam_script)](https://hex.pm/packages/gleam_script)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gleam_script/)
 
-`gscript` allows using `gleam` as a scripting language by abstracting away the project repo. It only supports the Erlang as a target and requires any dependencies to be defined inline using comments. Scripts can be exported to `escript` files when ready.
+`gleam_script` allows using `gleam` as a scripting language by abstracting away the project repo. It only supports the Erlang as a target and requires any dependencies to be defined inline using comments. Scripts can be exported to `escript` files when ready.
 
 ## Todo
 
@@ -31,27 +31,27 @@ The app will work like this.
 The gleam version and dependencies will be specified as TOML metadata in comments.
 
 ```gleam
-//gscript>
+//gleam_script>
 // gleam = ">= 0.34.0"
 //
 // [dependencies]
 // gleam_stdlib = ">= 0.47.0 and < 2.0.0"
-//gscript<
+//gleam_script<
 
 import gleam/io
 
 pub fn main() -> Nil {
-  io.println("Hello from gscript!")
+  io.println("Hello from gleam_script!")
 }
 ```
 
 Inline gleam.toml notes:
 - Only the `gleam` and `[dependencies]` sections are supported.
     - Publisher metadata and target configuration are irrelevant.
-- They must be wrapped in `//gscript>` and `//gscript<` lines.
+- They must be wrapped in `//gleam_script>` and `//gleam_script<` lines.
 - The advantage of using comments here is to preserve syntax highlighting and line numbers.
 
-Further documentation can be found at <https://hexdocs.pm/gscript>.
+Further documentation can be found at <https://hexdocs.pm/gleam_script>.
 
 ## Development
 
