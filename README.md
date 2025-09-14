@@ -3,7 +3,7 @@
 [![Package Version](https://img.shields.io/hexpm/v/gleam_script)](https://hex.pm/packages/gleam_script)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gleam_script/)
 
-`gleam_script` allows using `gleam` as a scripting language by abstracting away the project repo. It only supports the Erlang as a target and requires any dependencies to be defined inline using comments. Scripts can be exported to `escript` files when ready.
+`gleam_script` allows Gleam to be used as a scripting language by abstracting away the project repo. It only supports the Erlang target and requires any dependencies to be defined inline using comments. Scripts can be exported to `escript` files when ready.
 
 ## Usage
 
