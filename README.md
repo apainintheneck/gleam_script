@@ -41,6 +41,7 @@ pub fn main() -> Nil {
 1. Add support for the `new` and `clean` commands.
 2. check if the dependencies are already defined before adding them.
 3. Add integration tests.
+4. Commit an escript along with each release.
 
 Further documentation can be found at <https://hexdocs.pm/gleam_script>.
 
@@ -48,5 +49,4 @@ Further documentation can be found at <https://hexdocs.pm/gleam_script>.
 
 ```sh
 gleam run   # Run the project
-gleam test  # Run the tests
 ```
