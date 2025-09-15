@@ -36,9 +36,8 @@ pub fn main() {
 `````
 
 ## Todo
-1. check if the dependencies are already defined before adding them.
-2. Add integration tests.
-3. Commit an escript along with each release.
+1. Add integration tests.
+2. Commit an escript along with each release.
 
 ## Development
 

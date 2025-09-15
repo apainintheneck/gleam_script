@@ -1,13 +1,17 @@
 import filepath
 import gleam/bit_array
 import gleam/crypto
+import gleam/dict
 import gleam/list
+import gleam/result
+import gleam/set
 import gleam/string
 import gleam_script/dir
 import gleam_script/io.{type Context}
 import gleam_script/script.{type Script}
 import shellout
 import simplifile
+import tom
 
 pub opaque type Project {
   Project(script: Script, context: Context, directory: String)
@@ -51,7 +55,7 @@ pub fn check(project: Project) -> Nil {
     run: "gleam",
     with: ["check"],
     in: project.directory,
-    log_output: True,
+    log_output: False,
     ctx: project.context,
   )
 }
@@ -193,15 +197,55 @@ fn update_content(project: Project) -> Nil {
 }
 
 fn update_dependencies(project: Project) -> Nil {
-  io.print_verbose("info: updating project dependencies", ctx: project.context)
+  case has_dependencies(project) {
+    True -> Nil
+    False -> {
+      io.print_verbose(
+        "info: updating project dependencies",
+        ctx: project.context,
+      )
 
-  command_or_abort(
-    run: "gleam",
-    with: ["add", ..project.script.dependencies],
-    in: project.directory,
-    log_output: True,
-    ctx: project.context,
+      command_or_abort(
+        run: "gleam",
+        with: ["add", ..project.script.dependencies],
+        in: project.directory,
+        log_output: True,
+        ctx: project.context,
+      )
+    }
+  }
+}
+
+fn has_dependencies(project: Project) -> Bool {
+  io.print_verbose("info: checking project dependencies", ctx: project.context)
+
+  case config_dependencies(project) {
+    Ok(config_deps) -> {
+      let config_deps = set.from_list(config_deps)
+      list.all(project.script.dependencies, fn(dep) {
+        set.contains(config_deps, dep)
+      })
+    }
+    Error(_) -> False
+  }
+}
+
+fn config_dependencies(project: Project) -> Result(List(String), Nil) {
+  use contents <- result.try(
+    filepath.join(project.directory, "gleam.toml")
+    |> simplifile.read
+    |> result.replace_error(Nil),
   )
+  use toml <- result.try(
+    tom.parse(contents)
+    |> result.replace_error(Nil),
+  )
+  use deps <- result.try(
+    tom.get_table(toml, ["dependencies"])
+    |> result.replace_error(Nil),
+  )
+
+  Ok(dict.keys(deps))
 }
 
 fn command(
