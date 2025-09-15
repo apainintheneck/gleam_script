@@ -31,7 +31,7 @@ const gleam_script_template = "// Add more dependencies to gleam_deps below: one
 
 import gleam/io
 
-pub fn main() -> Nil {
+pub fn main() {
   io.println(\"Hello from script!\")
 }
 "

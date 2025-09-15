@@ -33,16 +33,15 @@ options:
 
 import gleam/io
 
-pub fn main() -> Nil {
+pub fn main() {
   io.println("Hello from script!")
 }
 `````
 
 ## Todo
-1. Add support for the `new` and `clean` commands.
-2. check if the dependencies are already defined before adding them.
-3. Add integration tests.
-4. Commit an escript along with each release.
+1. check if the dependencies are already defined before adding them.
+2. Add integration tests.
+3. Commit an escript along with each release.
 
 Further documentation can be found at <https://hexdocs.pm/gleam_script>.
 
