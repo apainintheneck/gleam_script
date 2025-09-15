@@ -1,9 +1,9 @@
-import directories
 import filepath
 import gleam/bit_array
 import gleam/crypto
 import gleam/list
 import gleam/string
+import gleam_script/dir
 import gleam_script/io.{type Context}
 import gleam_script/script.{type Script}
 import shellout
@@ -15,19 +15,26 @@ pub opaque type Project {
 
 pub fn new(script: Script, ctx context: Context) -> Project {
   let project_name = hash(script.path)
-  let cache_directory = cache_dir()
-  let project_directory = filepath.join(cache_directory, project_name)
-  let project = Project(script:, context:, directory: project_directory)
+  let cache_dir = dir.cache_dir()
+  let project_dir = filepath.join(cache_dir, project_name)
+  let project = Project(script:, context:, directory: project_dir)
 
-  case simplifile.is_directory(project_directory) {
-    Ok(_) -> {
+  case simplifile.is_directory(project_dir) {
+    Ok(True) -> {
       io.print_verbose("info: find project", ctx: context)
     }
-    Error(_) -> {
+    Ok(False) -> {
       io.print_verbose("info: create project", ctx: context)
-      init_directory(cache_directory:, project_name:, ctx: context)
+      init_directory(cache_directory: cache_dir, project_name:, ctx: context)
       init_config(project)
       delete_test_directory(project)
+    }
+    Error(_) -> {
+      io.abort(
+        msg: "error: invalid permissions to check for the project directory:\n"
+          <> project_dir,
+        code: 1,
+      )
     }
   }
 
@@ -264,16 +271,6 @@ fn command_or_abort(
     code: exit_code,
     unless: exit_code == 0,
   )
-}
-
-fn cache_dir() -> String {
-  case directories.cache_dir() {
-    Ok(dir) -> filepath.join(dir, "gleam_script")
-    Error(_) -> {
-      io.abort(msg: "error: unable to determine XDG cache directory", code: 1)
-      panic as "unreachable"
-    }
-  }
 }
 
 fn hash(str input: String) -> String {

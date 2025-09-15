@@ -9,10 +9,12 @@
 
 ```
 [gleam_script]
-One file scripts for Gleam.
+Project directories and dependency management are
+abstracted away to bring one file scripts to Gleam.
 
 commands:
 - check  <FILE> : typecheck the script
+- clean         : clean up all script files
 - deps   <FILE> : list the dependencies
 - export <FILE> : compile to escript
 - run    <FILE> : run the script
