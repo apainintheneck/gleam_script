@@ -11,7 +11,7 @@ pub fn new(path: String) -> Script {
   let dependencies = parse_dependencies(contents)
 
   io.abort_unless(
-    msg: config_error("missing dependencies"),
+    msg: "error: missing dependencies",
     code: 1,
     unless: list.length(dependencies) > 0,
   )
@@ -27,16 +27,4 @@ fn parse_dependencies(contents: String) -> List(String) {
   |> list.take_while(fn(line) { !string.starts_with(line, "// ```") })
   |> list.filter(fn(line) { string.starts_with(line, "//") })
   |> list.map(fn(line) { line |> string.drop_start(2) |> string.trim })
-}
-
-fn config_error(message: String) -> String {
-  "error: " <> message <> "
-
-  Dependencies are added inline separated by newlines:
-
-  // ```gleam_deps
-  // gleam_stdlib
-  // simplifile
-  // ```
-  "
 }
