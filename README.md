@@ -9,10 +9,12 @@
 
 ```
 [gleam_script]
-One file scripts for Gleam.
+Project directories and dependency management are
+abstracted away to bring one file scripts to Gleam.
 
 commands:
 - check  <FILE> : typecheck the script
+- clean         : clean up all script files
 - deps   <FILE> : list the dependencies
 - export <FILE> : compile to escript
 - run    <FILE> : run the script
@@ -27,21 +29,19 @@ options:
 ````gleam
 // ```gleam_deps
 // gleam_stdlib
-// simplifile
 // ```
 
 import gleam/io
 
-pub fn main() -> Nil {
-  io.println("Hello from gleam_script!")
+pub fn main() {
+  io.println("Hello from script!")
 }
 `````
 
 ## Todo
-1. Add support for the `new` and `clean` commands.
-2. check if the dependencies are already defined before adding them.
-3. Add integration tests.
-4. Commit an escript along with each release.
+1. check if the dependencies are already defined before adding them.
+2. Add integration tests.
+3. Commit an escript along with each release.
 
 Further documentation can be found at <https://hexdocs.pm/gleam_script>.
 
