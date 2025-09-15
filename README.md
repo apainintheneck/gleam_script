@@ -29,13 +29,12 @@ options:
 ````gleam
 // ```gleam_deps
 // gleam_stdlib
-// simplifile
 // ```
 
 import gleam/io
 
 pub fn main() -> Nil {
-  io.println("Hello from gleam_script!")
+  io.println("Hello from script!")
 }
 `````
 

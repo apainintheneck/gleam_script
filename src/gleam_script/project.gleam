@@ -21,10 +21,10 @@ pub fn new(script: Script, ctx context: Context) -> Project {
 
   case simplifile.is_directory(project_dir) {
     Ok(True) -> {
-      io.print_verbose("info: find project", ctx: context)
+      io.print_verbose("info: found existing project", ctx: context)
     }
     Ok(False) -> {
-      io.print_verbose("info: create project", ctx: context)
+      io.print_verbose("info: creating new project", ctx: context)
       init_directory(cache_directory: cache_dir, project_name:, ctx: context)
       init_config(project)
       delete_test_directory(project)
@@ -45,7 +45,7 @@ pub fn new(script: Script, ctx context: Context) -> Project {
 }
 
 pub fn check(project: Project) -> Nil {
-  io.print_verbose("info: lint project", ctx: project.context)
+  io.print_verbose("info: linting project", ctx: project.context)
 
   command_or_abort(
     run: "gleam",
@@ -57,18 +57,20 @@ pub fn check(project: Project) -> Nil {
 }
 
 pub fn deps(project: Project) -> Nil {
-  io.print_verbose("info: show dependencies", ctx: project.context)
+  io.print_verbose("info: showing dependencies", ctx: project.context)
 
   command_or_abort(
     run: "gleam",
-    with: ["deps", "tree"],
+    with: ["deps", "list"],
     in: project.directory,
-    log_output: True,
+    log_output: False,
     ctx: project.context,
   )
 }
 
 pub fn export(project: Project) -> Nil {
+  io.print_verbose("info: exporting escript", ctx: project.context)
+
   command_or_abort(
     run: "gleam",
     with: ["add", "--dev", "gleescript"],
@@ -170,7 +172,7 @@ fn delete_test_directory(project: Project) -> Nil {
 }
 
 fn update_content(project: Project) -> Nil {
-  io.print_verbose("info: updating project content", ctx: project.context)
+  io.print_verbose("info: checking project content", ctx: project.context)
 
   let old_text_path =
     list.fold(
@@ -183,7 +185,10 @@ fn update_content(project: Project) -> Nil {
 
   case hash(old_text) == hash(new_text) {
     True -> Nil
-    False -> io.write_file_or_abort(to: old_text_path, contents: new_text)
+    False -> {
+      io.print_verbose("info: updating project content", ctx: project.context)
+      io.write_file_or_abort(to: old_text_path, contents: new_text)
+    }
   }
 }
 
@@ -206,6 +211,11 @@ fn command(
   log_output log_output: Bool,
   ctx context: Context,
 ) -> Int {
+  io.print_verbose(
+    "$ " <> string.join([executable, ..arguments], with: " "),
+    ctx: context,
+  )
+
   let options = case log_output {
     True -> []
     False -> [shellout.LetBeStdout, shellout.LetBeStderr]
@@ -223,11 +233,6 @@ fn command(
     Ok(output) -> #(0, output)
     Error(code_and_ouput) -> code_and_ouput
   }
-
-  io.print_verbose(
-    "$ " <> string.join([executable, ..arguments], with: " "),
-    ctx: context,
-  )
 
   case string.is_empty(output) {
     True -> Nil
@@ -267,7 +272,7 @@ fn command_or_abort(
     |> string.join(with: " ")
 
   io.abort_unless(
-    msg: "error: unable to run `" <> command_prefix <> "` internally",
+    msg: "error: running command internally:\n" <> command_prefix,
     code: exit_code,
     unless: exit_code == 0,
   )

@@ -11,15 +11,29 @@ Project directories and dependency management are
 abstracted away to bring one file scripts to Gleam.
 
 commands:
-- check  <FILE> : typecheck the script
-- clean         : clean up all script files
-- deps   <FILE> : list the dependencies
-- export <FILE> : compile to escript
+- new    <FILE> : generate a template script
 - run    <FILE> : run the script
+- export <FILE> : compile to escript
+- check  <FILE> : typecheck the script
+- deps   <FILE> : list the dependencies
+- clean         : clean up all internal files
 - help          : show this page
 
 options:
 -v/--verbose
+"
+
+const gleam_script_template = "// Add more dependencies to gleam_deps below: one per line.
+//
+// ```gleam_deps
+// gleam_stdlib
+// ```
+
+import gleam/io
+
+pub fn main() -> Nil {
+  io.println(\"Hello from script!\")
+}
 "
 
 pub fn main() -> Nil {
@@ -78,6 +92,32 @@ pub fn main() -> Nil {
     }
     ["help"] -> {
       io.abort(msg: help_page, code: 0)
+    }
+    ["new", file] -> {
+      case simplifile.is_file(file) {
+        Ok(True) ->
+          io.abort(msg: "error: file already exists:\n" <> file, code: 1)
+        Ok(False) -> {
+          case simplifile.write(to: file, contents: gleam_script_template) {
+            Ok(_) ->
+              io.print_verbose(
+                "info: created gleam_script template file:\n" <> file,
+                ctx: context,
+              )
+            Error(_) ->
+              io.abort(
+                msg: "error: unable to create a gleam_script template file:\n"
+                  <> file,
+                code: 1,
+              )
+          }
+        }
+        Error(_) ->
+          io.abort(
+            msg: "error: invalid permissions to check for the file:\n" <> file,
+            code: 1,
+          )
+      }
     }
     ["run", file] -> {
       script.new(file)
