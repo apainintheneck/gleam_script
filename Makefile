@@ -1,4 +1,4 @@
-export XDG_CACHE_HOME = .test
+export XDG_CACHE_HOME = .gscript_test
 
 script = $(XDG_CACHE_HOME)/test.gleam
 escript = $(XDG_CACHE_HOME)/test
@@ -12,6 +12,10 @@ lint:
 	@echo
 
 test:
+	@echo \# Prep: Create test directory
+	mkdir -p $(XDG_CACHE_HOME)
+	@echo
+
 	@echo \# 1. gleam_script new FILE
 	test ! -f $(script)
 	gleam run -- new $(script) --verbose

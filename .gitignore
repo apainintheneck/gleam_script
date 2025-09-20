@@ -2,5 +2,5 @@
 *.ez
 /build
 erl_crash.dump
-/.test
+/.gscript_test
 gleam_script

@@ -25,22 +25,23 @@ pub fn new(script: Script, ctx context: Context) -> Project {
   let project_dir = filepath.join(cache_dir, project_name)
   let project = Project(script:, context:, directory: project_dir)
 
-  case simplifile.is_directory(project_dir) {
-    Ok(True) -> {
+  let success =
+    simplifile.is_directory(project_dir)
+    |> io.unwrap_or_abort(
+      msg: "error: invalid permissions to check for the project directory:\n"
+        <> project_dir,
+      code: 1,
+    )
+
+  case success {
+    True -> {
       io.print_verbose("info: found existing project", ctx: context)
     }
-    Ok(False) -> {
+    False -> {
       io.print_verbose("info: creating new project", ctx: context)
       init_directory(cache_directory: cache_dir, project_name:, ctx: context)
       init_config(project)
       delete_test_directory(project)
-    }
-    Error(_) -> {
-      io.abort(
-        msg: "error: invalid permissions to check for the project directory:\n"
-          <> project_dir,
-        code: 1,
-      )
     }
   }
 
@@ -175,14 +176,15 @@ fn init_config(project: Project) -> Nil {
 }
 
 fn delete_test_directory(project: Project) -> Nil {
-  let res =
+  let test_dir =
     project.directory
     |> filepath.join("test")
-    |> simplifile.clear_directory
 
-  let assert Ok(_) = res as "error: unable to delete test directory"
-
-  Nil
+  simplifile.delete(test_dir)
+  |> io.unwrap_or_abort(
+    msg: "error: unable to delete test directory:\n" <> test_dir,
+    code: 1,
+  )
 }
 
 fn update_content(project: Project) -> Nil {
