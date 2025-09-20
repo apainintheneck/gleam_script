@@ -17,28 +17,31 @@ pub opaque type Project {
   Project(script: Script, context: Context, directory: String)
 }
 
+const internal_name = "script"
+
 pub fn new(script: Script, ctx context: Context) -> Project {
   let project_name = hash(script.path)
   let cache_dir = dir.cache_dir()
   let project_dir = filepath.join(cache_dir, project_name)
   let project = Project(script:, context:, directory: project_dir)
 
-  case simplifile.is_directory(project_dir) {
-    Ok(True) -> {
+  let success =
+    simplifile.is_directory(project_dir)
+    |> io.unwrap_or_abort(
+      msg: "error: invalid permissions to check for the project directory:\n"
+        <> project_dir,
+      code: 1,
+    )
+
+  case success {
+    True -> {
       io.print_verbose("info: found existing project", ctx: context)
     }
-    Ok(False) -> {
+    False -> {
       io.print_verbose("info: creating new project", ctx: context)
       init_directory(cache_directory: cache_dir, project_name:, ctx: context)
       init_config(project)
       delete_test_directory(project)
-    }
-    Error(_) -> {
-      io.abort(
-        msg: "error: invalid permissions to check for the project directory:\n"
-          <> project_dir,
-        code: 1,
-      )
     }
   }
 
@@ -91,19 +94,23 @@ pub fn export(project: Project) -> Nil {
     ctx: project.context,
   )
 
-  let outfile_path =
-    simplifile.current_directory()
-    |> io.unwrap_or_abort(
-      msg: "error: unable to get current working directory",
-      code: 1,
-    )
-
   command_or_abort(
     run: "gleam",
-    with: ["run", "-m", "gleescript", "--", "--out", outfile_path],
+    with: ["run", "-m", "gleescript"],
     in: project.directory,
     log_output: True,
     ctx: project.context,
+  )
+
+  let escript_path = filepath.strip_extension(project.script.path)
+
+  simplifile.rename(
+    filepath.join(project.directory, internal_name),
+    escript_path,
+  )
+  |> io.unwrap_or_abort(
+    msg: "error: unable to move escript to expected location:\n" <> escript_path,
+    code: 1,
   )
 }
 
@@ -128,6 +135,13 @@ fn init_directory(
   ctx context: Context,
 ) -> Nil {
   io.print_verbose("info: creating project directory", ctx: context)
+  let cache_dir = dir.cache_dir()
+
+  simplifile.create_directory_all(cache_dir)
+  |> io.unwrap_or_abort(
+    msg: "error: unable to create cache directory:\n" <> cache_dir,
+    code: 1,
+  )
 
   command_or_abort(
     run: "gleam",
@@ -135,7 +149,7 @@ fn init_directory(
       "new",
       name,
       "--name",
-      "script",
+      internal_name,
       "--template",
       "erlang",
       "--skip-git",
@@ -148,7 +162,9 @@ fn init_directory(
 }
 
 const empty_config = "
-name = \"script\"
+name = \""
+  <> internal_name
+  <> "\"
 version = \"1.0.0\"
 
 [dependencies]
@@ -165,14 +181,15 @@ fn init_config(project: Project) -> Nil {
 }
 
 fn delete_test_directory(project: Project) -> Nil {
-  let res =
+  let test_dir =
     project.directory
     |> filepath.join("test")
-    |> simplifile.clear_directory
 
-  let assert Ok(_) = res as "error: unable to delete test directory"
-
-  Nil
+  simplifile.delete(test_dir)
+  |> io.unwrap_or_abort(
+    msg: "error: unable to delete test directory:\n" <> test_dir,
+    code: 1,
+  )
 }
 
 fn update_content(project: Project) -> Nil {

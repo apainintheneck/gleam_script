@@ -39,8 +39,7 @@ pub fn main() {
 `````
 
 ## Todo
-1. Add integration tests.
-2. Commit an escript along with each release.
+1. Commit an escript along with each release.
 
 ## Development
 

@@ -1,4 +1,5 @@
 import gleam/io
+import gleam/string
 import shellout
 import simplifile
 
@@ -41,8 +42,10 @@ pub fn unwrap_or_abort(
 ) -> a {
   case result {
     Ok(value) -> value
-    Error(_) -> {
-      abort(msg: message, code: exit_code)
+    Error(err) -> {
+      io.println(message)
+      io.println("inspect: " <> string.inspect(err))
+      shellout.exit(exit_code)
       panic as "unreachable"
     }
   }
