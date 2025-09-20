@@ -10,11 +10,12 @@ Project directories and dependency management are
 abstracted away to bring one file scripts to Gleam.
 
 commands:
-- check  <FILE> : typecheck the script
-- clean         : clean up all script files
-- deps   <FILE> : list the dependencies
-- export <FILE> : compile to escript
+- new    <FILE> : generate a template script
 - run    <FILE> : run the script
+- export <FILE> : compile to escript
+- check  <FILE> : typecheck the script
+- deps   <FILE> : list the dependencies
+- clean         : clean up all internal files
 - help          : show this page
 
 options:
@@ -24,6 +25,8 @@ options:
 ## Example
 
 ````gleam
+// Add more dependencies to gleam_deps below: one per line.
+//
 // ```gleam_deps
 // gleam_stdlib
 // ```
