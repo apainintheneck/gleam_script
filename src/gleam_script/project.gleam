@@ -17,6 +17,8 @@ pub opaque type Project {
   Project(script: Script, context: Context, directory: String)
 }
 
+const internal_name = "script"
+
 pub fn new(script: Script, ctx context: Context) -> Project {
   let project_name = hash(script.path)
   let cache_dir = dir.cache_dir()
@@ -100,7 +102,7 @@ pub fn export(project: Project) -> Nil {
   )
 
   simplifile.rename(
-    filepath.join(project.directory, "script"),
+    filepath.join(project.directory, internal_name),
     filepath.strip_extension(project.script.path),
   )
   |> io.unwrap_or_abort(
@@ -141,7 +143,7 @@ fn init_directory(
       "new",
       name,
       "--name",
-      "script",
+      internal_name,
       "--template",
       "erlang",
       "--skip-git",
@@ -154,7 +156,9 @@ fn init_directory(
 }
 
 const empty_config = "
-name = \"script\"
+name = \""
+  <> internal_name
+  <> "\"
 version = \"1.0.0\"
 
 [dependencies]
