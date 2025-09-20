@@ -102,12 +102,14 @@ pub fn export(project: Project) -> Nil {
     ctx: project.context,
   )
 
+  let escript_path = filepath.strip_extension(project.script.path)
+
   simplifile.rename(
     filepath.join(project.directory, internal_name),
-    filepath.strip_extension(project.script.path),
+    escript_path,
   )
   |> io.unwrap_or_abort(
-    msg: "error: unable to move escript to expected location",
+    msg: "error: unable to move escript to expected location:\n" <> escript_path,
     code: 1,
   )
 }
@@ -133,10 +135,13 @@ fn init_directory(
   ctx context: Context,
 ) -> Nil {
   io.print_verbose("info: creating project directory", ctx: context)
+  let cache_dir = dir.cache_dir()
 
-  dir.cache_dir()
-  |> simplifile.create_directory_all
-  |> io.unwrap_or_abort(msg: "error: unable to create cache directory", code: 1)
+  simplifile.create_directory_all(cache_dir)
+  |> io.unwrap_or_abort(
+    msg: "error: unable to create cache directory:\n" <> cache_dir,
+    code: 1,
+  )
 
   command_or_abort(
     run: "gleam",

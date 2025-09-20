@@ -29,6 +29,7 @@ test:
 	@echo
 
 	@echo \# 3. gleam_script export FILE
+	test ! -f $(escript)
 	gleam run -- export $(script) --verbose
 	test -f $(escript)
 	escript $(escript)
