@@ -1,0 +1,53 @@
+export XDG_CACHE_HOME = .test
+
+script = $(XDG_CACHE_HOME)/test.gleam
+escript = $(XDG_CACHE_HOME)/test
+internal_dir = $(XDG_CACHE_HOME)/gleam_script
+
+default: lint test
+
+lint:
+	@echo \# Run linter
+	gleam format --check src
+	@echo
+
+test:
+	@echo \# 1. gleam_script new FILE
+	test ! -f $(script)
+	gleam run -- new $(script) --verbose
+	test -f $(script)
+	@echo
+
+	@echo \# 2. gleam_script run FILE
+	test ! -d $(internal_dir)
+	gleam run -- run $(script) --verbose
+	test -d $(internal_dir)
+	@echo
+
+	@echo \# 3. gleam_script export FILE
+	gleam run -- export $(script) --verbose
+	test -f $(escript)
+	escript $(escript)
+	@echo
+
+	@echo \# 4. gleam_script check FILE
+	gleam run -- check $(script) --verbose
+	@echo
+
+	@echo \# 5. gleam_script deps FILE
+	gleam run -- deps $(script) --verbose
+	@echo
+
+	@echo \# 6. gleam_script clean
+	test -d $(internal_dir)
+	gleam run -- clean --verbose
+	test ! -e $(internal_dir)
+	@echo
+
+	@echo \# 7. gleam_script help
+	gleam run -- help --verbose
+	@echo
+
+clean:
+	@echo \# Clean up local XDG_CACHE_HOME test directory
+	test ! -e $(XDG_CACHE_HOME) || rm -Ir $(XDG_CACHE_HOME)
