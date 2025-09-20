@@ -94,29 +94,28 @@ pub fn main() -> Nil {
       io.abort(msg: help_page, code: 0)
     }
     ["new", file] -> {
-      case simplifile.is_file(file) {
-        Ok(True) ->
-          io.abort(msg: "error: file already exists:\n" <> file, code: 1)
-        Ok(False) -> {
-          case simplifile.write(to: file, contents: gleam_script_template) {
-            Ok(_) ->
-              io.print_verbose(
-                "info: created gleam_script template file:\n" <> file,
-                ctx: context,
-              )
-            Error(_) ->
-              io.abort(
-                msg: "error: unable to create a gleam_script template file:\n"
-                  <> file,
-                code: 1,
-              )
-          }
-        }
-        Error(_) ->
-          io.abort(
-            msg: "error: invalid permissions to check for the file:\n" <> file,
+      let success =
+        simplifile.is_file(file)
+        |> io.unwrap_or_abort(
+          msg: "error: invalid permissions to check for the file:\n" <> file,
+          code: 1,
+        )
+
+      case success {
+        True -> io.abort(msg: "error: file already exists:\n" <> file, code: 1)
+        False -> {
+          simplifile.write(to: file, contents: gleam_script_template)
+          |> io.unwrap_or_abort(
+            msg: "error: unable to create a gleam_script template file:\n"
+              <> file,
             code: 1,
           )
+
+          io.print_verbose(
+            "info: created gleam_script template file:\n" <> file,
+            ctx: context,
+          )
+        }
       }
     }
     ["run", file] -> {
