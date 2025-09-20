@@ -91,19 +91,21 @@ pub fn export(project: Project) -> Nil {
     ctx: project.context,
   )
 
-  let outfile_path =
-    simplifile.current_directory()
-    |> io.unwrap_or_abort(
-      msg: "error: unable to get current working directory",
-      code: 1,
-    )
-
   command_or_abort(
     run: "gleam",
-    with: ["run", "-m", "gleescript", "--", "--out", outfile_path],
+    with: ["run", "-m", "gleescript"],
     in: project.directory,
     log_output: True,
     ctx: project.context,
+  )
+
+  simplifile.rename(
+    filepath.join(project.directory, "script"),
+    filepath.strip_extension(project.script.path),
+  )
+  |> io.unwrap_or_abort(
+    msg: "error: unable to move escript to expected location",
+    code: 1,
   )
 }
 
@@ -128,6 +130,10 @@ fn init_directory(
   ctx context: Context,
 ) -> Nil {
   io.print_verbose("info: creating project directory", ctx: context)
+
+  dir.cache_dir()
+  |> simplifile.create_directory_all
+  |> io.unwrap_or_abort(msg: "error: unable to create cache directory", code: 1)
 
   command_or_abort(
     run: "gleam",

@@ -59,9 +59,9 @@ pub fn main() -> Nil {
 
       case simplifile.is_directory(cache_dir) {
         Ok(True) -> {
-          simplifile.clear_directory(cache_dir)
+          simplifile.delete(cache_dir)
           |> io.unwrap_or_abort(
-            msg: "error: unable to delete cache_dir:\n" <> cache_dir,
+            msg: "error: unable to delete cache directory:\n" <> cache_dir,
             code: 1,
           )
 
