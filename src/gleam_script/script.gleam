@@ -1,5 +1,6 @@
 import gleam/list
 import gleam/string
+import gleam_script/fs
 import gleam_script/io
 
 pub type Script {
@@ -7,7 +8,7 @@ pub type Script {
 }
 
 pub fn new(path: String) -> Script {
-  let contents = io.read_file_or_abort(from: path)
+  let contents = fs.read_file_or_abort(from: path)
   let dependencies = parse_dependencies(contents)
 
   io.abort_unless(
