@@ -3,3 +3,6 @@
 /build
 erl_crash.dump
 /.gscript_test
+gleam_script
+*.gleam
+!src/**

@@ -4,7 +4,7 @@ script = $(XDG_CACHE_HOME)/test.gleam
 escript = $(XDG_CACHE_HOME)/test
 internal_dir = $(XDG_CACHE_HOME)/gleam_script
 
-default: lint test
+default: lint clean test
 
 lint:
 	@echo \# Run linter
@@ -32,7 +32,7 @@ test:
 	test ! -f $(escript)
 	gleam run -- export $(script) --verbose
 	test -f $(escript)
-	escript $(escript)
+	./$(escript)
 	@echo
 
 	@echo \# 4. gleam_script check FILE
@@ -53,6 +53,13 @@ test:
 	gleam run -- help --verbose
 	@echo
 
+release: default
+	@echo \# Creating escript
+	gleam build
+	gleam run -m gleescript
+	@echo
+
 clean:
-	@echo \# Clean up local XDG_CACHE_HOME test directory
+	@echo \# Clean up local test directory
 	test ! -e $(XDG_CACHE_HOME) || rm -Ir $(XDG_CACHE_HOME)
+	@echo

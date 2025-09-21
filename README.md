@@ -10,13 +10,13 @@ Project directories and dependency management are
 abstracted away to bring one file scripts to Gleam.
 
 commands:
-- new    <FILE> : generate a template script
-- run    <FILE> : run the script
-- export <FILE> : compile to escript
-- check  <FILE> : typecheck the script
-- deps   <FILE> : list the dependencies
-- clean         : clean up all internal files
-- help          : show this page
+- new    <file>              : generate a script
+- run    <file> -- <args>... : run a script
+- export <file>              : compile to an escript
+- check  <file>              : typecheck a script
+- deps   <file>              : list the dependencies
+- clean                      : clean up cached files
+- help                       : show this page
 
 options:
 -v/--verbose
@@ -38,11 +38,13 @@ pub fn main() {
 }
 `````
 
-## Todo
-1. Commit an escript along with each release.
-
 ## Development
 
 ```sh
-gleam run   # Run the project
+gleam run     # Run the project
+make          # Lint and test the project
+make lint     # Lint the project
+make test     # Test the project
+make clean    # Delete the test directory
+make release  # Create an escript
 ```
