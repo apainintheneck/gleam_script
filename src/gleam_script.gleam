@@ -1,9 +1,9 @@
+import argv
 import gleam/list
 import gleam_script/fs
 import gleam_script/io
 import gleam_script/project
 import gleam_script/script
-import shellout
 import simplifile
 
 const help_page = "[gleam_script]
@@ -38,7 +38,7 @@ pub fn main() {
 
 pub fn main() -> Nil {
   let #(args, verbose) =
-    list.partition(shellout.arguments(), with: fn(arg) {
+    list.partition(argv.load().arguments, with: fn(arg) {
       arg != "-v" && arg != "--verbose"
     })
   let context = case list.length(verbose) {
