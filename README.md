@@ -10,13 +10,13 @@ Project directories and dependency management are
 abstracted away to bring one file scripts to Gleam.
 
 commands:
-- new    <FILE> : generate a template script
-- run    <FILE> : run the script
-- export <FILE> : compile to escript
-- check  <FILE> : typecheck the script
-- deps   <FILE> : list the dependencies
-- clean         : clean up all internal files
-- help          : show this page
+- new    <file>              : generate a script
+- run    <file> -- <args>... : run a script
+- export <file>              : compile to an escript
+- check  <file>              : typecheck a script
+- deps   <file>              : list the dependencies
+- clean                      : clean up cached files
+- help                       : show this page
 
 options:
 -v/--verbose

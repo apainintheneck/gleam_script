@@ -125,13 +125,13 @@ pub fn export(project: Project) -> Nil {
   )
 }
 
-pub fn run(project: Project) -> Nil {
+pub fn run(project: Project, with args: List(String)) -> Nil {
   io.print_verbose("info: run project", ctx: project.context)
 
   let exit_code =
     command(
       run: "gleam",
-      with: ["run"],
+      with: ["run", "--", ..args],
       in: project.directory,
       log_output: False,
       ctx: project.context,

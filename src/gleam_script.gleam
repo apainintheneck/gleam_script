@@ -11,13 +11,13 @@ Project directories and dependency management are
 abstracted away to bring one file scripts to Gleam.
 
 commands:
-- new    <FILE> : generate a template script
-- run    <FILE> : run the script
-- export <FILE> : compile to escript
-- check  <FILE> : typecheck the script
-- deps   <FILE> : list the dependencies
-- clean         : clean up all internal files
-- help          : show this page
+- new    <file>              : generate a script
+- run    <file> -- <args>... : run a script
+- export <file>              : compile to an escript
+- check  <file>              : typecheck a script
+- deps   <file>              : list the dependencies
+- clean                      : clean up cached files
+- help                       : show this page
 
 options:
 -v/--verbose
@@ -37,23 +37,15 @@ pub fn main() {
 "
 
 pub fn main() -> Nil {
-  let #(args, verbose) =
-    list.partition(argv.load().arguments, with: fn(arg) {
-      arg != "-v" && arg != "--verbose"
-    })
-  let context = case list.length(verbose) {
-    0 -> io.Normal
-    _ -> io.Verbose
-  }
-
-  case args {
+  let args = parse_args()
+  case args.list {
     ["check", file] -> {
       script.new(file)
-      |> project.new(ctx: context)
+      |> project.new(ctx: args.context)
       |> project.check
     }
     ["clean"] -> {
-      io.print_verbose("info: cleaning up cache directory", ctx: context)
+      io.print_verbose("info: cleaning up cache directory", ctx: args.context)
 
       let cache_dir = fs.cache_dir()
 
@@ -67,7 +59,7 @@ pub fn main() -> Nil {
 
           io.print_verbose(
             "info: deleted cache directory:\n  " <> cache_dir,
-            ctx: context,
+            ctx: args.context,
           )
         }
         Ok(False) -> Nil
@@ -82,12 +74,12 @@ pub fn main() -> Nil {
     }
     ["deps", file] -> {
       script.new(file)
-      |> project.new(ctx: context)
+      |> project.new(ctx: args.context)
       |> project.deps
     }
     ["export", file] -> {
       script.new(file)
-      |> project.new(ctx: context)
+      |> project.new(ctx: args.context)
       |> project.export
     }
     ["help"] -> {
@@ -106,15 +98,34 @@ pub fn main() -> Nil {
 
       io.print_verbose(
         "info: creating gleam_script template file:\n  " <> file,
-        ctx: context,
+        ctx: args.context,
       )
       fs.write_file_or_abort(to: file, contents: gleam_script_template)
     }
     ["run", file] -> {
       script.new(file)
-      |> project.new(ctx: context)
-      |> project.run
+      |> project.new(ctx: args.context)
+      |> project.run(with: args.extra)
     }
     _ -> io.abort(msg: "usage: gleam_script <command> <file>", code: 1)
   }
+}
+
+type Arguments {
+  Arguments(list: List(String), extra: List(String), context: io.Context)
+}
+
+fn parse_args() -> Arguments {
+  let #(args, verbose) =
+    list.partition(argv.load().arguments, with: fn(arg) {
+      arg != "-v" && arg != "--verbose"
+    })
+  let #(list, extra) =
+    list.split_while(args, satisfying: fn(arg) { arg != "--" })
+  let extra = extra |> list.drop(1)
+  let context = case list.length(verbose) {
+    0 -> io.Normal
+    _ -> io.Verbose
+  }
+  Arguments(list:, extra:, context:)
 }
