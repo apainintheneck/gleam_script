@@ -38,11 +38,13 @@ pub fn main() {
 }
 `````
 
-## Todo
-1. Commit an escript along with each release.
-
 ## Development
 
 ```sh
-gleam run   # Run the project
+gleam run     # Run the project
+make          # Lint and test the project
+make lint     # Lint the project
+make test     # Test the project
+make clean    # Delete the test directory
+make release  # Create an escript
 ```
