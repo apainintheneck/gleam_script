@@ -1,7 +1,7 @@
 import gleam/io
 import gleam/string
+import input
 import shellout
-import simplifile
 
 pub type Context {
   Normal
@@ -51,19 +51,15 @@ pub fn unwrap_or_abort(
   }
 }
 
-pub fn read_file_or_abort(from path: String) -> String {
-  case simplifile.read(path) {
-    Ok(contents) -> contents
-    Error(_) -> {
-      abort(msg: "error: unable to read file:\n" <> path, code: 1)
-      panic as "unreachable"
-    }
-  }
-}
+pub fn confirm_or_abort(prompt: String) -> Nil {
+  let response =
+    input.input(prompt:)
+    |> unwrap_or_abort(msg: "error: unable to get user input", code: 1)
+    |> string.trim
+    |> string.lowercase
 
-pub fn write_file_or_abort(to path: String, contents contents: String) -> Nil {
-  case simplifile.write(to: path, contents:) {
-    Ok(_) -> Nil
-    Error(_) -> abort(msg: "error: unable to write file:\n" <> path, code: 1)
+  case response {
+    "y" | "yes" -> Nil
+    _ -> abort(msg: "...exiting program...", code: 1)
   }
 }

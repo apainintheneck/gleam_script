@@ -6,7 +6,7 @@ import gleam/list
 import gleam/result
 import gleam/set
 import gleam/string
-import gleam_script/dir
+import gleam_script/fs
 import gleam_script/io.{type Context}
 import gleam_script/script.{type Script}
 import shellout
@@ -21,14 +21,14 @@ const internal_name = "script"
 
 pub fn new(script: Script, ctx context: Context) -> Project {
   let project_name = hash(script.path)
-  let cache_dir = dir.cache_dir()
+  let cache_dir = fs.cache_dir()
   let project_dir = filepath.join(cache_dir, project_name)
   let project = Project(script:, context:, directory: project_dir)
 
   let success =
     simplifile.is_directory(project_dir)
     |> io.unwrap_or_abort(
-      msg: "error: invalid permissions to check for the project directory:\n"
+      msg: "error: invalid permissions to check for the project directory:\n  "
         <> project_dir,
       code: 1,
     )
@@ -78,6 +78,18 @@ pub fn deps(project: Project) -> Nil {
 pub fn export(project: Project) -> Nil {
   io.print_verbose("info: exporting escript", ctx: project.context)
 
+  let escript_path = filepath.strip_extension(project.script.path)
+
+  case fs.file_exists(escript_path) {
+    True ->
+      io.confirm_or_abort(
+        "A file already exists at:\n  "
+        <> escript_path
+        <> "\nWould you like to overwrite it? (y/n) ",
+      )
+    False -> Nil
+  }
+
   command_or_abort(
     run: "gleam",
     with: ["add", "--dev", "gleescript"],
@@ -102,14 +114,13 @@ pub fn export(project: Project) -> Nil {
     ctx: project.context,
   )
 
-  let escript_path = filepath.strip_extension(project.script.path)
-
   simplifile.rename(
     filepath.join(project.directory, internal_name),
     escript_path,
   )
   |> io.unwrap_or_abort(
-    msg: "error: unable to move escript to expected location:\n" <> escript_path,
+    msg: "error: unable to move escript to expected location:\n  "
+      <> escript_path,
     code: 1,
   )
 }
@@ -135,11 +146,11 @@ fn init_directory(
   ctx context: Context,
 ) -> Nil {
   io.print_verbose("info: creating project directory", ctx: context)
-  let cache_dir = dir.cache_dir()
+  let cache_dir = fs.cache_dir()
 
   simplifile.create_directory_all(cache_dir)
   |> io.unwrap_or_abort(
-    msg: "error: unable to create cache directory:\n" <> cache_dir,
+    msg: "error: unable to create cache directory:\n  " <> cache_dir,
     code: 1,
   )
 
@@ -174,7 +185,7 @@ version = \"1.0.0\"
 "
 
 fn init_config(project: Project) -> Nil {
-  io.write_file_or_abort(
+  fs.write_file_or_abort(
     to: filepath.join(project.directory, "gleam.toml"),
     contents: empty_config,
   )
@@ -187,7 +198,7 @@ fn delete_test_directory(project: Project) -> Nil {
 
   simplifile.delete(test_dir)
   |> io.unwrap_or_abort(
-    msg: "error: unable to delete test directory:\n" <> test_dir,
+    msg: "error: unable to delete test directory:\n  " <> test_dir,
     code: 1,
   )
 }
@@ -201,14 +212,14 @@ fn update_content(project: Project) -> Nil {
       from: project.directory,
       with: filepath.join,
     )
-  let old_text = io.read_file_or_abort(from: old_text_path)
+  let old_text = fs.read_file_or_abort(from: old_text_path)
   let new_text = project.script.contents
 
   case hash(old_text) == hash(new_text) {
     True -> Nil
     False -> {
       io.print_verbose("info: updating project content", ctx: project.context)
-      io.write_file_or_abort(to: old_text_path, contents: new_text)
+      fs.write_file_or_abort(to: old_text_path, contents: new_text)
     }
   }
 }
@@ -333,7 +344,7 @@ fn command_or_abort(
     |> string.join(with: " ")
 
   io.abort_unless(
-    msg: "error: running command internally:\n" <> command_prefix,
+    msg: "error: running command internally:\n  " <> command_prefix,
     code: exit_code,
     unless: exit_code == 0,
   )
