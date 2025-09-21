@@ -38,6 +38,8 @@ pub fn main() {
 }
 `````
 
+Note: Specifying dependency versions is not planned to keep things simple.
+
 ## Development
 
 ```sh
