@@ -14,7 +14,7 @@ pub fn new(path: String) -> Script {
   io.abort_unless(
     msg: "error: missing dependencies",
     code: 1,
-    unless: list.length(dependencies) > 0,
+    unless: dependencies != [],
   )
 
   Script(path:, contents:, dependencies:)
